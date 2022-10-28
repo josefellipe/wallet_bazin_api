@@ -150,18 +150,61 @@ class Investidor:
         conexao.close()
         return mensagem
 
+
+
+####################################             Investidor-Ativo            ####################################  
+
+
+class InvestidorAtivo:
+    def __init__(self, id_investidor_acao, fk_investidor, ticket, ativo_quantidade, valor_cota):
+        self.id_investidor_acao = id_investidor_acao
+        self.fk_investidor = fk_investidor
+        self.ticket = ticket
+        self.ativo_quantidade = ativo_quantidade
+        self.valor_cota = valor_cota
+
+
     '''Esta função adiciona à carteira (tbl investidor_ativo) uma acao
-    Parâmetros: é esperado um dic com as chaves: id_investidor, ticket, quantidade, valor_cota
+    Parâmetros: é esperado um dic com as chaves: id_investidor, ticket, ativo_quantidade, valor_cota
     Return: mensagem de OK'''
     def adicionar_acao_carteira(dados):
+        id_investidor = dados['id_investidor']
         ticket = dados['ticket']
-        quantidade = dados['quantidade']
-        acao_detalhe = Acao.consultar_acao_especifica(ticket)
+        quantidade = dados['ativo_quantidade']
+        valor_cota = dados['valor_cota']
         conexao = sqlite3.connect('app_bazin.db')
         cursor = conexao.cursor()
-        comando = f"""INSERT INTO investidor (login, senha, nome)
-                    VALUES ()"""
+        comando = f"""INSERT INTO investidor_ativo (fk_investidor, ticket_ativo, ativo_quantidade, valor_cota)
+                    VALUES ('{id_investidor}','{ticket}','{quantidade}','{valor_cota}')"""
+        cursor.execute(comando)
+        conexao.commit()
+        cursor.close()
+        conexao.close()
         mensagem = 'ok'
         return {'mensagem': mensagem}
 
 
+    '''
+    Esta função consulta os ativos na carteira de um investidor
+    Parâmetros: apenas o id do investidor
+    Saída: Um array 
+    '''
+    def consultar_ativos_carteira(id_investidor):
+        conexao = sqlite3.connect('app_bazin.db')
+        cursor = conexao.cursor()
+        comando = f"SELECT * FROM investidor_ativo WHERE fk_investidor = '{id_investidor}'"
+        cursor.execute(comando)
+        ativos = cursor.fetchall()
+        cursor.close()
+        conexao.close()
+        ativos_aux = []
+        ativo_aux = {}
+        for ativo_ in ativos:
+            ativo_aux['id_operacao'] = ativo_[0]
+            ativo_aux['id_investidos'] = ativo_[1]
+            ativo_aux['ticket_ativo'] = ativo_[2]
+            ativo_aux['ativo_quantidade'] = ativo_[3]
+            ativo_aux['valor_cota'] = ativo_[4]
+            ativos_aux.append(ativo_aux)
+        return ativos_aux
+        
